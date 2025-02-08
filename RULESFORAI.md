@@ -1,14 +1,14 @@
 STRICT RULES 🔥
 - !!!!!!!!!!!!!!!!!!ALWAYS FETCH & CROSS-REFERENCE ALL RULES!!!!!!!!!!!!!!!
 - 🧠 CONSTANTLY MAINTAIN BRAIN CONTEXT:
-  - Read `@brain-memories-lessons-learned-scratchpad.mdc` FIRST before every interaction
-  - Check `@.cursorrules` for mode system state
-  - Verify against `@memories.md` for historical context
-  - Consult `@lessons-learned.md` for error prevention
-  - Update `@scratchpad.md` in real-time during "plan" mode
-  - READ THE `@project-requirements.md` file to know what should include and not
-  - Follow `@documentations-inline-comments-changelog-docs.mdc` for documentation standards
-  - Reference `@php-best-practices.mdc` for PHP/WordPress development
+  - Read `.cursor/rules/brain-memories-lessons-learned-scratchpad.mdc` FIRST before every interaction
+  - Check `.cursorrules` for mode system state
+  - Verify against `.cursor/memories.md` for historical context
+  - Consult `.cursor/lessons-learned.md` for error prevention
+  - Update `.cursor/scratchpad.md` in real-time during "plan" mode
+  - READ THE `.cursor/project-requirements.md` file to know what should include and not
+  - Follow `.cursor/rules/documentations-inline-comments-changelog-docs.mdc` for documentation standards
+  - Reference `.cursor/rules/php-best-practices.mdc` for PHP/WordPress development
 
 ### CORE PRINCIPLES 💡
 1. **Beginner-First Mentorship**:
@@ -47,16 +47,16 @@ STRICT RULES 🔥
    - 🚨 **Security Compliance**:
      - Always encrypt sensitive data (AES-256)
      - Validate ALL user inputs with Zod
-     - Follow GDPR requirements from `@scratchpad.md`
+     - Follow GDPR requirements from `.cursor/scratchpad.md`
 
 ### INTERACTION PROTOCOLS 🤖
 1. **Plan Mode (🎯)**:
    - When I say "plan":
-     1. Create/update `@scratchpad.md` with:
+     1. Create/update `.cursor/scratchpad.md` with:
         - Current phase status
         - Confidence score (update in real-time)
         - Clear questions with examples
-     2. Follow exact Chat Session format from `.cursorrules`
+     2. Follow exact Chat Session format from `.cursor/rules/cursor-rules.mdc`
      3. Block execution until 95% confidence
 
 2. **Agent Mode (⚡)**:
@@ -85,9 +85,9 @@ STRICT RULES 🔥
 
 ### DOCUMENTATION FLOW 📄
 1. **Live Updates**:
-   - `@memories.md`: Auto-log every code change
-   - `@lessons-learned.md`: Update on error resolution
-   - `@scratchpad.md`: Real-time plan tracking
+   - `.cursor/memories.md`: Auto-log every code change
+   - `.cursor/lessons-learned.md`: Update on error resolution
+   - `.cursor/scratchpad.md`: Real-time plan tracking
 
 2. **Phase Completion**:
    - When phase done:
@@ -114,8 +114,8 @@ STRICT RULES 🔥
 EXAMPLE USAGE 💡
 User: "plan how to implement auth"
 AI: 🎯 Plan Mode Activated!
-1. Checks `@scratchpad.md` Phase 2 Auth section
-2. Verifies against `@docs/project-requirements.md`
+1. Checks `.cursor/scratchpad.md` Phase 2 Auth section
+2. Verifies against `.cursor/project-requirements.md`
 3. Asks: "Nath, should we implement Google SSO? (Options: 🅰️ Yes 🅱️ No)"
 4. Updates confidence from 85% → 92%
 5. Proceeds when all questions resolved → ⚡ Agent Mode!
