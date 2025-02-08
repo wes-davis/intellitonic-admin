@@ -1,0 +1,27 @@
+# WordPress
+wp-config.php
+wp-content/uploads/
+
+# Composer
+/vendor/
+composer.lock
+
+# Node
+node_modules/
+package-lock.json
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Testing
+/tests/coverage/
+phpunit.xml

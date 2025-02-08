@@ -1,0 +1,136 @@
+---
+description: Writing in PHP
+globs: **/*.php
+---
+# PHP Best Practices for WordPress Development
+
+## Database Queries 🔍
+1. **Frontend Safety**
+   - Never write to database on frontend pages
+   - Use proper hooks for admin-only operations
+
+2. **Query Optimization**
+   - Always use `wp_cache_get()` before database queries
+   - Use `WP_Query` objects instead of `get_posts()` or direct `$wpdb` queries
+   - Configure query flags appropriately:
+     ```php
+     $args = [
+         'no_found_rows' => true,           // When pagination not needed
+         'update_post_meta_cache' => false,  // When not using post meta
+         'update_post_term_cache' => false,  // When not using taxonomy terms
+     ];
+     ```
+
+3. **Query Best Practices**
+   - Never use `posts_per_page => -1`
+   - Always use `no_found_rows => true` when not paginating
+   - Avoid `post__not_in` - filter in PHP instead
+   - Avoid multi-dimensional queries (across multiple taxonomies/meta keys)
+   - Avoid using post meta for searching/filtering - use taxonomies instead
+   - Keep `wp_options` table under 500 rows
+   - Use `autoload => no` for options not needed on every page load
+
+## Caching Strategy 🚀
+1. **Query Caching**
+   - Cache all `WP_Query` calls other than main query
+   - Cache all remote API requests
+   - Use transients with expiration times
+   - Implement cache priming on content updates
+
+2. **Page Caching**
+   - Use batcache when file caching not possible
+   - Create proper cache keys including variable parameters
+   - Never rely on cached objects being present
+
+## Data Storage 💾
+1. **Storage Types**
+   ```php
+   // Options: Site settings only
+   update_option('my_setting', $value);
+
+   // Post Meta: Data specific to a post
+   update_post_meta($post_id, 'my_meta', $value);
+
+   // Taxonomies: Data shared across posts
+   wp_set_object_terms($post_id, $terms, 'my_taxonomy');
+
+   // Custom Post Types: Variable amounts of similar data
+   register_post_type('my_cpt', $args);
+   ```
+
+2. **Session Handling**
+   - Never store sessions in database
+   - Use cookies or client-side storage instead of sessions when possible
+
+## Security 🔒
+1. **Input Handling**
+   - Validate or sanitize all data before storage
+   - Use WordPress sanitization functions
+   - Prepare all SQL queries
+   - Use `wpdb->prepare()` for variable SQL
+   - Escape all output using appropriate `esc_*` function
+   - Practice late escaping - escape at point of output
+   - Validate nonces for all update/delete actions
+
+## Internationalization 🌍
+1. **Translation Best Practices**
+   - Use literal strings only with translation functions
+   - Never pass variables to translation functions
+   - Use unique text domain matching project slug
+   - Always escape translated strings
+   - Use `sprintf()` for variable injection in translations
+
+## Code Organization 📁
+1. **Namespacing**
+   - Namespace all PHP code outside template files
+   - Use consistent namespace hierarchy: Vendor/Project/Component
+   - Document namespace strategy
+
+2. **Code Structure**
+   - Keep functions simple and focused
+   - Document all classes, methods, and properties
+   - Make properties/methods protected instead of private
+
+## Best Practices ⭐
+1. **Architecture**
+   - Avoid singletons
+   - Use class inheritance for DRY code
+   - Avoid global variables
+   - Use dependency injection rather than creating objects internally
+   - Document all dependencies in docblocks
+   - Don't register hooks in constructors
+   - Decouple plugins and themes using `add_theme_support`
+
+2. **Asset Management**
+   - Version all assets using constants
+   - Write verbose inline documentation explaining 'why'
+   - Follow WordPress coding standards
+   - Use Markdown for code blocks
+   - Avoid heredoc/nowdoc syntax
+
+3. **Testing & Quality**
+   - Write unit tests for distributed code
+   - Use strict comparison (`===`)
+   - Use `current_theme_supports()` check in plugins
+   - Increment version constants before deployment
+   - Never store credentials in code
+   - Use `wp_json_encode()` for JavaScript data
+   - Only use `wp_kses_*` functions when absolutely necessary
+   - Cache `wp_kses_*` output when used
+   - Use `in_array()` with strict comparison (true as third parameter)
+   - Never use `query_posts()`
+   - Define text domain in plugin/theme headers for WordPress.org releases
+   - Document all property and method visibility choices
+
+## Error Prevention 🚫
+1. **Defensive Programming**
+   - Handle missing cache gracefully
+   - Validate data exists before using
+   - Check for nonces before processing actions
+   - Escape early, escape often
+   - Document all assumptions
+   - Use strict comparison (`===`)
+   - Build arrays for key lookup vs searching
+   - Cache expensive operations
+   - Validate all user input
+   - Consider race conditions in concurrent operations 
