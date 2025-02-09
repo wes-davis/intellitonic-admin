@@ -145,4 +145,109 @@ Each feature must implement Abstract_Module with:
    new My_Feature();
    ```
 
+## Creating a New Feature Module
+1. **Directory Structure**
+   ```
+   includes/Feature_Modules/
+   └── MyFeature/
+       ├── MyFeature.php           // Main feature class
+       ├── Settings.php            // Feature settings (if needed)
+       └── View/
+           ├── MyFeature_View.php  // Feature view
+           └── Settings_View.php   // Settings view (if needed)
+   ```
+
+2. **Required Files Checklist**
+   - [ ] Main feature class extending Abstract_Module
+   - [ ] Settings class (if feature has settings)
+   - [ ] View class(es) for UI components
+   - [ ] Any additional trait files for shared functionality
+
+3. **Implementation Steps**
+   a. Create feature directory:
+      ```bash
+      mkdir -p includes/Feature_Modules/MyFeature/View
+      ```
+
+   b. Create main feature class:
+      ```php
+      namespace Intellitonic\Admin\Feature_Modules\MyFeature;
+
+      class MyFeature extends Abstract_Module {
+          public function __construct() {
+              parent::__construct(
+                  'my_feature',
+                  __('My Feature', 'intellitonic-admin'),
+                  __('Feature description', 'intellitonic-admin')
+              );
+          }
+
+          public function init(): void {
+              $this->settings = new Settings($this);
+              $this->view = new MyFeature_View($this);
+          }
+
+          protected function register_discovery_hooks(): void {
+              parent::register_discovery_hooks();
+              // Add feature-specific discovery hooks
+          }
+
+          protected function register_activation_hooks(): void {
+              parent::register_activation_hooks();
+              // Add feature-specific activation hooks
+          }
+      }
+
+      // Self-instantiate
+      new MyFeature();
+      ```
+
+   c. Create settings class (if needed):
+      ```php
+      namespace Intellitonic\Admin\Feature_Modules\MyFeature;
+
+      class Settings extends Abstract_Feature_Settings {
+          public function register(): void {
+              // Register settings fields
+          }
+      }
+      ```
+
+   d. Create view class:
+      ```php
+      namespace Intellitonic\Admin\Feature_Modules\MyFeature\View;
+
+      class MyFeature_View extends Abstract_View {
+          public function render(array $data = []): void {
+              // Render feature UI
+          }
+      }
+      ```
+
+4. **Integration Checklist**
+   - [ ] Feature self-registers via constructor
+   - [ ] Settings properly registered with WordPress
+   - [ ] View follows template/presentation separation
+   - [ ] Proper hook registration in discovery/activation methods
+   - [ ] Dependency injection for all components
+   - [ ] No direct instantiation of dependencies
+   - [ ] Proper capability checks
+   - [ ] Nonce verification for forms
+   - [ ] Sanitization and escaping
+   - [ ] Transient caching where appropriate
+
+5. **Testing Requirements**
+   - [ ] Unit tests for feature logic
+   - [ ] Integration tests for WordPress hooks
+   - [ ] Settings validation tests
+   - [ ] View rendering tests
+   - [ ] Security tests (nonce, caps)
+
+6. **Documentation Requirements**
+   - [ ] PHPDoc blocks for all classes/methods
+   - [ ] Inline comments explaining complex logic
+   - [ ] Usage examples in README
+   - [ ] Hook documentation
+   - [ ] Filter documentation
+
 
