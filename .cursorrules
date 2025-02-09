@@ -313,7 +313,7 @@ The scratchpad serves as a phase-specific task tracker and implementation planne
    - Track confidence scores
 
 -----------PROJECT REQUIREMENTS RULES--------------
-# Project Requirements rules `@docs/project-requirements.md`
+# Project Requirements rules `.cursor/project-requirements.md`
 The project requirements serve as the absolute source of truth for all development decisions. Follow these strict rules:
 
 1. **Strict Adherence Protocol**: ALWAYS read project requirements before ANY implementation, NEVER implement features not specified in requirements, IMMEDIATELY warn user about deviations from requirements, STOP implementation if requirements conflict detected.

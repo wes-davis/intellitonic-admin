@@ -11,13 +11,13 @@
   Example:
   ```php
   // Bad
-  public function __construct(Feature_Manager $feature_manager) {
-      $this->settings = new Settings($feature_manager);
+  public function __construct(Feature_Registry $feature_registry) {
+      $this->settings = new Settings($feature_registry);
   }
 
   // Good
   public function __construct(
-      Feature_Manager $feature_manager,
+      Feature_Registry $feature_registry,
       Settings $settings,
       Menu $menu
   ) {
@@ -60,6 +60,31 @@
       return true;
   }
   ```
+
+- [2025-02-09 18:00] Feature Module Pattern:
+  Problem: Inconsistent feature registration and tight coupling between components
+  Solution: Implement self-registering modules with hook-based discovery
+  Prevention: Follow strict module pattern with PSR-4 and hook-based registration
+  Impact: Improves maintainability, testability, and feature isolation
+  Example:
+  ```php
+  // Bad - Direct instantiation and registration
+  class Plugin {
+      public function __construct() {
+          $feature = new My_Feature();
+          $feature->register();
+      }
+  }
+
+  // Good - Self-registering module
+  class My_Feature extends Abstract_Module {
+      public function __construct() {
+          parent::__construct('id', 'name', 'description');
+      }
+  }
+  new My_Feature(); // Self-instantiate at end of file
+  ```
+  Links: includes/Feature_Modules/Auto_Update_Email_Manager/Auto_Update_Email_Manager.php
 
 ### Documentation Standards
 - [2025-02-09 15:45] Documentation Workflow:
@@ -144,7 +169,7 @@
       return $cached;
   }
   ```
-  Links: includes/Core/Feature_Manager.php
+  Links: includes/Core/Feature_Registry.php
 
 - [2025-02-09 17:00] Cache Invalidation:
   Problem: Cache invalidation not properly handled in feature state changes
@@ -159,7 +184,29 @@
   // Invalidating cache
   wp_cache_delete('key');
   ```
-  Links: includes/Core/Feature_Manager.php
+  Links: includes/Core/Feature_Registry.php
 
+### Feature Module Architecture
+- [2024-02-09 19:00] Hook Registration Order:
+  Problem: Fatal error due to incorrect hook registration order and uninitialized objects
+  Solution: Implement proper initialization checks and hook registration sequence in Abstract_Module
+  Prevention:
+    - Always check object existence before registering hooks
+    - Initialize core components before registering hooks
+    - Use method_exists() check before adding callbacks
+  Impact: Prevents fatal errors and ensures proper feature lifecycle
+  Example:
+  ```php
+  protected function init_settings(): void {
+      // Register settings first
+      register_setting(...);
+
+      // Then check object and method existence before hooks
+      if ($this->settings !== null && method_exists($this->settings, 'register')) {
+          add_action('admin_init', [$this->settings, 'register']);
+      }
+  }
+  ```
+  Links: includes/Feature_Modules/Abstract_Module.php, includes/Feature_Modules/Auto_Update_Email_Manager/Auto_Update_Email_Manager.php
 
 *Note: This file is updated only upon user request and focuses on capturing important, reusable lessons learned during development. Each entry includes a timestamp, category, and comprehensive explanation to prevent similar issues in the future.*

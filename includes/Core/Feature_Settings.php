@@ -1,40 +1,40 @@
 <?php
 
 /**
- * Settings class
+ * Feature Settings class
  *
  * @package Intellitonic\Admin\Core
  */
 
 namespace Intellitonic\Admin\Core;
 
-use Intellitonic\Admin\Features\Abstract_Feature;
+use Intellitonic\Admin\Feature_Modules\Abstract_Module;
 
 /**
  * Handles WordPress Settings API integration
  */
-class Settings
+class Feature_Settings
 {
 	/**
-	 * Settings group name
+	 * Feature Settings group name
 	 */
 	const SETTINGS_GROUP = 'intellitonic_admin_settings';
 
 	/**
 	 * Feature manager instance
 	 *
-	 * @var Feature_Manager
+	 * @var Feature_Registry
 	 */
-	private $feature_manager;
+	private $feature_registry;
 
 	/**
 	 * Constructor
 	 *
-	 * @param Feature_Manager $feature_manager Feature manager instance.
+	 * @param Feature_Registry $feature_registry Feature manager instance.
 	 */
-	public function __construct(Feature_Manager $feature_manager)
+	public function __construct(Feature_Registry $feature_registry)
 	{
-		$this->feature_manager = $feature_manager;
+		$this->feature_registry = $feature_registry;
 	}
 
 	/**
@@ -72,7 +72,7 @@ class Settings
 			self::SETTINGS_GROUP
 		);
 
-		foreach ($this->feature_manager->get_features() as $feature) {
+		foreach ($this->feature_registry->get_features() as $feature) {
 			add_settings_field(
 				'intellitonic_feature_' . $feature->get_id() . '_enabled',
 				$feature->get_name(),
@@ -85,11 +85,13 @@ class Settings
 				]
 			);
 
-			// Register feature-specific settings if they exist
-			$settings = $feature->get_settings();
+			// Get validated settings
+			$settings = $this->get_validated_settings($feature);
+
 			if (!empty($settings)) {
 				$section_id = 'intellitonic_feature_' . $feature->get_id() . '_settings';
 
+				// Register settings section
 				add_settings_section(
 					$section_id,
 					sprintf(
@@ -103,6 +105,7 @@ class Settings
 					self::SETTINGS_GROUP
 				);
 
+				// Register individual settings
 				foreach ($settings as $setting) {
 					add_settings_field(
 						$setting['id'],
@@ -140,10 +143,10 @@ class Settings
 	/**
 	 * Render feature settings section
 	 *
-	 * @param Abstract_Feature $feature Feature instance.
+	 * @param Abstract_Module $feature Feature instance.
 	 * @return void
 	 */
-	public function render_feature_settings_section(Abstract_Feature $feature): void
+	public function render_feature_settings_section(Abstract_Module $feature): void
 	{
 		if (!$feature->is_enabled()) {
 			echo '<div class="notice notice-warning inline"><p>';
@@ -166,7 +169,7 @@ class Settings
 	{
 		$feature = $args['feature'];
 		$option_name = 'intellitonic_feature_' . $feature->get_id() . '_enabled';
-		$enabled = $this->feature_manager->get_feature_state($feature->get_id());
+		$enabled = $this->feature_registry->get_feature_state($feature->get_id());
 		$can_be_enabled = $feature->can_be_enabled();
 		$dependencies = $feature->get_dependencies();
 
@@ -192,7 +195,7 @@ class Settings
 			echo '</p>';
 			echo '<ul>';
 			foreach ($dependencies as $dependency_id) {
-				$dependency = $this->feature_manager->get_feature($dependency_id);
+				$dependency = $this->feature_registry->get_feature($dependency_id);
 				if ($dependency) {
 					printf(
 						'<li>%s%s</li>',
@@ -273,13 +276,18 @@ class Settings
 	/**
 	 * Sanitize settings
 	 *
-	 * @param array $input Settings input.
+	 * @param mixed $input Settings input.
 	 * @return array
 	 */
-	public function sanitize_settings(array $input): array
+	public function sanitize_settings($input): array
 	{
+		// If input is null or not an array, return empty array as default
+		if (!is_array($input)) {
+			return [];
+		}
+
 		$output = [];
-		$features = $this->feature_manager->get_features();
+		$features = $this->feature_registry->get_features();
 
 		foreach ($input as $key => $value) {
 			if (strpos($key, 'intellitonic_feature_') === 0 && strpos($key, '_enabled') !== false) {
@@ -337,14 +345,36 @@ class Settings
 		switch ($action) {
 			case 'enable':
 				foreach ($feature_ids as $id) {
-					$this->feature_manager->enable_feature($id);
+					$this->feature_registry->enable_feature($id);
 				}
 				break;
 			case 'disable':
 				foreach ($feature_ids as $id) {
-					$this->feature_manager->disable_feature($id);
+					$this->feature_registry->disable_feature($id);
 				}
 				break;
 		}
+	}
+
+	/**
+	 * Get feature settings with type safety
+	 *
+	 * @param Abstract_Module $feature Feature instance
+	 * @return array Validated settings array
+	 */
+	private function get_validated_settings(Abstract_Module $feature): array {
+		$settings = $feature->get_settings();
+
+		// Type safety check
+		if (!is_array($settings)) {
+			return [];
+		}
+
+		// Validate each setting has required keys
+		return array_filter($settings, function($setting) {
+			return is_array($setting)
+				&& isset($setting['id'])
+				&& isset($setting['label']);
+		});
 	}
 }

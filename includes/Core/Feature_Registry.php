@@ -1,24 +1,24 @@
 <?php
-
 /**
- * Feature Manager class
+ * Feature Registry
  *
  * @package Intellitonic\Admin\Core
+ * @since 1.0.0
  */
 
 namespace Intellitonic\Admin\Core;
 
-use Intellitonic\Admin\Features\Abstract_Feature;
+use Intellitonic\Admin\Feature_Modules\Abstract_Module;
 
 /**
- * Handles feature registration and state management
+ * Handles feature discovery and state management
  */
-class Feature_Manager
+class Feature_Registry
 {
 	/**
 	 * Registered features
 	 *
-	 * @var Abstract_Feature[]
+	 * @var Abstract_Module[]
 	 */
 	private $features = [];
 
@@ -34,29 +34,49 @@ class Feature_Manager
 	 */
 	public function __construct()
 	{
-		add_action('init', [$this, 'init_features']);
+		// Listen for feature registrations
+		add_action('intellitonic_feature_registered', [$this, 'add_feature']);
+
+		// Discover features immediately
+		$this->discover_features();
+
+		// Check dependencies after all features are registered
 		add_action('admin_init', [$this, 'check_dependencies']);
 	}
 
 	/**
-	 * Register a new feature
+	 * Discover features by triggering registration
 	 *
-	 * @param Abstract_Feature $feature Feature instance.
+	 * @internal
 	 * @return void
 	 */
-	public function register_feature(Abstract_Feature $feature): void
+	public function discover_features(): void
+	{
+		/**
+		 * Trigger feature registration
+		 *
+		 * Features should hook into this action to register themselves
+		 */
+		do_action('intellitonic_register_features');
+	}
+
+	/**
+	 * Add a discovered feature
+	 *
+	 * @internal
+	 * @param Abstract_Module $feature Feature instance.
+	 * @return void
+	 */
+	public function add_feature(Abstract_Module $feature): void
 	{
 		$this->features[$feature->get_id()] = $feature;
-		$this->state_cache[$feature->get_id()] = null; // Reset cache for new feature
-
-		// Register the feature's hooks
-		$feature->register();
+		$this->state_cache[$feature->get_id()] = null;
 	}
 
 	/**
 	 * Get all registered features
 	 *
-	 * @return Abstract_Feature[]
+	 * @return Abstract_Module[]
 	 */
 	public function get_features(): array
 	{
@@ -67,32 +87,17 @@ class Feature_Manager
 	 * Get a specific feature by ID
 	 *
 	 * @param string $id Feature ID.
-	 * @return Abstract_Feature|null
+	 * @return Abstract_Module|null
 	 */
-	public function get_feature(string $id): ?Abstract_Feature
+	public function get_feature(string $id): ?Abstract_Module
 	{
 		return $this->features[$id] ?? null;
 	}
 
 	/**
-	 * Initialize all enabled features
-	 *
-	 * @return void
-	 */
-	public function init_features(): void
-	{
-		// Features are now initialized through their registered hooks
-		// This method remains for backward compatibility
-		_doing_it_wrong(
-			__METHOD__,
-			esc_html__('Features are now initialized through WordPress hooks. This method is deprecated.', 'intellitonic-admin'),
-			'1.0.0'
-		);
-	}
-
-	/**
 	 * Check feature dependencies and disable features with unmet dependencies
 	 *
+	 * @internal
 	 * @return void
 	 */
 	public function check_dependencies(): void

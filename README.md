@@ -134,7 +134,7 @@ MIT License - Free to use and modify!
 
 A modular WordPress admin plugin with toggleable features.
 
-## Features
+## Feature_Modules
 - Feature toggle system with dependency management
 - Modular architecture with self-registering features
 - WordPress Settings API integration
@@ -153,15 +153,53 @@ A modular WordPress admin plugin with toggleable features.
 
 ## Development
 - Follow WordPress Coding Standards
-- Use PSR-4 autoloading
+- Use PSR-4 autoloading throughout
 - Implement proper hooks system
+- Follow object-oriented patterns in ALL components
 - Maintain comprehensive documentation
+- Use interface-driven design everywhere
+- Inject all dependencies
+- Keep presentation logic in templates only
 
-## Security
-- All features require 'manage_options' capability
-- Proper nonce verification
-- Input sanitization
-- XSS prevention
+## Architecture
+- Modular architecture with self-registering features
+- Each feature completely independent
+- Views as proper objects with dependency injection
+- Templates for presentation logic only
+- Clear separation of concerns
+- No procedural code outside templates
 
-## License
-GPL v2 or later
+## Directory Structure
+```
+intellitonic-admin/
+├── includes/
+│   ├── Core/
+│   │   ├── Admin.php               // Core admin interface
+│   │   ├── Feature_Registry.php    // Handles registration/discovery
+│   │   ├── Feature_Settings.php    // Toggle state management
+│   │   ├── Menu.php                // Admin menu handling
+│   │   └── View/
+│   │       ├── Abstract_View.php   // Common view logic
+│   │       └── Admin_View.php      // Core settings display
+│   ├── Feature_Modules/
+│   │   ├── Abstract_Module.php     // Base feature module contract
+│   │   ├── Activity_Monitor/
+│   │   │   ├── Activity_Monitor.php
+│   │   │   ├── Settings.php
+│   │   │   └── View/
+│   │   │       └── Monitor_View.php
+│   │   ├── Error_Monitor/
+│   │   │   ├── Error_Monitor.php
+│   │   │   ├── Settings.php
+│   │   │   └── View/
+│   │   │       └── Error_View.php
+│   │   └── Email_Settings/
+│   │       ├── Email_Settings.php
+│   │       ├── Settings.php
+│   │       └── View/
+│   │           └── Email_View.php
+│   └── admin/
+│       └── css/
+├── tests/
+└── uninstall.php
+```

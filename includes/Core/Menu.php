@@ -4,9 +4,14 @@
  * Menu class
  *
  * @package Intellitonic\Admin\Core
+ * @since 1.0.0
  */
 
 namespace Intellitonic\Admin\Core;
+
+use Intellitonic\Admin\Core\View\Admin_View;
+use Intellitonic\Admin\Core\View\Feature_Registry_View;
+use Intellitonic\Admin\Feature_Modules\Auto_Update_Email_Manager\View\Auto_Update_Email_Manager_View;
 
 /**
  * Handles admin menu registration
@@ -19,20 +24,20 @@ class Menu
 	const PARENT_MENU_SLUG = 'intellitonic-admin';
 
 	/**
-	 * Feature manager instance
+	 * Feature registry instance
 	 *
-	 * @var Feature_Manager
+	 * @var Feature_Registry
 	 */
-	private $feature_manager;
+	private $feature_registry;
 
 	/**
 	 * Constructor
 	 *
-	 * @param Feature_Manager $feature_manager Feature manager instance.
+	 * @param Feature_Registry $feature_registry Feature registry instance.
 	 */
-	public function __construct(Feature_Manager $feature_manager)
+	public function __construct(Feature_Registry $feature_registry)
 	{
-		$this->feature_manager = $feature_manager;
+		$this->feature_registry = $feature_registry;
 	}
 
 	/**
@@ -62,8 +67,9 @@ class Menu
 			return;
 		}
 
+		// Add main Intellitonic menu
 		add_menu_page(
-			__('Intellitonic Admin', 'intellitonic-admin'),
+			__('Intellitonic', 'intellitonic-admin'),
 			__('Intellitonic', 'intellitonic-admin'),
 			'manage_options',
 			self::PARENT_MENU_SLUG,
@@ -72,49 +78,55 @@ class Menu
 			30
 		);
 
+		// Add main menu item as first submenu
 		add_submenu_page(
 			self::PARENT_MENU_SLUG,
-			__('Features', 'intellitonic-admin'),
-			__('Features', 'intellitonic-admin'),
+			__('Dashboard', 'intellitonic-admin'),
+			__('Dashboard', 'intellitonic-admin'),
 			'manage_options',
-			self::PARENT_MENU_SLUG . '-features',
+			self::PARENT_MENU_SLUG,
+			[$this, 'render_main_page']
+		);
+
+		// Add Settings submenu
+		add_submenu_page(
+			self::PARENT_MENU_SLUG,
+			__('Intellitonic Admin Settings', 'intellitonic-admin'),
+			__('Settings', 'intellitonic-admin'),
+			'manage_options',
+			self::PARENT_MENU_SLUG . '-settings',
 			[$this, 'render_features_page']
 		);
+
+		// Let enabled features register their menu items
+		do_action('intellitonic_register_feature_menus', self::PARENT_MENU_SLUG);
 	}
 
 	/**
 	 * Render the main admin page
-	 *
-	 * @return void
 	 */
-	public function render_main_page(): void
-	{
-		// Verify capabilities before rendering
-		if (!current_user_can('manage_options')) {
-			wp_die(
-				esc_html__('You do not have sufficient permissions to access this page.', 'intellitonic-admin'),
-				403
-			);
-		}
-
-		require_once INTELLITONIC_ADMIN_PATH . 'includes/admin/views/main-page.php';
+	public function render_main_page(): void {
+		$view = new Admin_View($this->feature_registry);
+		$view->render();
 	}
 
 	/**
 	 * Render the features page
-	 *
-	 * @return void
 	 */
-	public function render_features_page(): void
-	{
-		// Verify capabilities before rendering
-		if (!current_user_can('manage_options')) {
-			wp_die(
-				esc_html__('You do not have sufficient permissions to access this page.', 'intellitonic-admin'),
-				403
-			);
-		}
+	public function render_features_page(): void {
+		$view = new Feature_Registry_View($this->feature_registry);
+		$view->render();
+	}
 
-		require_once INTELLITONIC_ADMIN_PATH . 'includes/admin/views/features-page.php';
+	/**
+	 * Render the email settings page
+	 */
+	public function render_email_settings_page(): void {
+		/** @var \Intellitonic\Admin\Feature_Modules\Auto_Update_Email_Manager\Auto_Update_Email_Manager $feature */
+		$feature = $this->feature_registry->get_feature('auto_update_email_manager');
+		if ($feature) {
+			$view = new Auto_Update_Email_Manager_View($feature);
+			$view->render();
+		}
 	}
 }

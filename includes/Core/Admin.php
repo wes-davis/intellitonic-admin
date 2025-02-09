@@ -4,9 +4,14 @@
  * Admin class
  *
  * @package Intellitonic\Admin\Core
+ * @since 1.0.0
  */
 
 namespace Intellitonic\Admin\Core;
+
+use Intellitonic\Admin\Core\Feature_Registry;
+use Intellitonic\Admin\Core\Feature_Settings;
+use Intellitonic\Admin\Core\Menu;
 
 /**
  * Main admin interface class
@@ -14,11 +19,11 @@ namespace Intellitonic\Admin\Core;
 class Admin
 {
 	/**
-	 * Feature manager instance
+	 * Feature registry instance
 	 *
-	 * @var Feature_Manager
+	 * @var Feature_Registry
 	 */
-	private $feature_manager;
+	private $feature_registry;
 
 	/**
 	 * Menu instance
@@ -28,25 +33,25 @@ class Admin
 	private $menu;
 
 	/**
-	 * Settings instance
+	 * Feature Settings instance
 	 *
-	 * @var Settings
+	 * @var Feature_Settings
 	 */
 	private $settings;
 
 	/**
 	 * Constructor
 	 *
-	 * @param Feature_Manager $feature_manager Feature manager instance.
-	 * @param Settings        $settings        Settings instance.
-	 * @param Menu            $menu            Menu instance.
+	 * @param Feature_Registry  $feature_registry Feature registry instance.
+	 * @param Feature_Settings  $settings         Settings instance.
+	 * @param Menu             $menu             Menu instance.
 	 */
 	public function __construct(
-		Feature_Manager $feature_manager,
-		Settings $settings,
+		Feature_Registry $feature_registry,
+		Feature_Settings $settings,
 		Menu $menu
 	) {
-		$this->feature_manager = $feature_manager;
+		$this->feature_registry = $feature_registry;
 		$this->settings = $settings;
 		$this->menu = $menu;
 	}
@@ -78,14 +83,14 @@ class Admin
 
 		wp_enqueue_style(
 			'intellitonic-admin',
-			INTELLITONIC_ADMIN_URL . 'includes/admin/css/admin.css',
+			INTELLITONIC_ADMIN_URL . 'includes/Admin/css/admin.css',
 			[],
 			INTELLITONIC_ADMIN_VERSION
 		);
 
 		wp_enqueue_script(
 			'intellitonic-admin',
-			INTELLITONIC_ADMIN_URL . 'includes/admin/js/admin.js',
+			INTELLITONIC_ADMIN_URL . 'includes/Admin/js/admin.js',
 			['jquery'],
 			INTELLITONIC_ADMIN_VERSION,
 			true
